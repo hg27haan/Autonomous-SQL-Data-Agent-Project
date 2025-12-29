@@ -24,7 +24,7 @@ def is_safe_sql(sql_query: str) -> bool:
             
     return True
 
-def execute_sql(sql_query: str):
+def execute_sql(sql_query: str, engine=None):
     """
     Input: Câu lệnh SQL (String)
     Output: 
@@ -36,7 +36,31 @@ def execute_sql(sql_query: str):
         return "ERROR: Câu lệnh SQL bị từ chối vì lý do bảo mật."
     
     # 2. Kết nối DB
-    engine = init_db()
+    is_local_engine = False
+    if engine is None:
+        engine = init_db()
+        is_local_engine = True
+    
+    try:
+        #Kết nối và thực thi
+        with engine.connect() as connection:
+            df = pd.read_sql(text(sql_query), connection)
+
+            # Kiểm tra kết quả
+            if df.empty:
+                return "Query chạy thành công nhưng không tìm thấy dữ liệu nào."    
+            return df
+    except Exception as e:
+        # Bắt lỗi cú pháp SQL (Ví dụ: AI bịa ra tên cột không tồn tại)
+        error_msg = str(e)
+        # Rút gọn lỗi cho dễ đọc (Lấy phần gốc từ SQLite)
+        if "(sqlite3.OperationalError)" in error_msg:
+            return f"SQL Error: {error_msg.split('(sqlite3.OperationalError)')[1].strip()}"
+        return f"System Error: {error_msg}"
+    finally:
+        if is_local_engine:
+            engine.dispose()
+            print("🔒 Đóng kết nối Database sau khi thực thi SQL.")
     
     try:
         # Sử dụng pandas để đọc SQL. Đây là cách clean nhất cho Data Project.

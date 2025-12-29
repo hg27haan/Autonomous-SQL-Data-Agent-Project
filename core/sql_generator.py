@@ -36,11 +36,20 @@ def generate_sql(question: str, engine=None):
     Input: Câu hỏi tiếng Việt
     Output: Câu lệnh SQL sạch
     """
+    is_local_engine = False
+
     # Bước A: Lấy Schema thực tế
     if engine is None:
         engine = init_db()
+        is_local_engine = True
         
-    schema_text = get_schema_string(engine)
+    try: 
+        schema_text = get_schema_string(engine)
+    
+    finally:
+        if is_local_engine:
+            engine.dispose()
+            print("🔒 Đóng kết nối Database sau khi lấy schema.")
     
     # Bước B: Tạo cấu hình cho Model
     # Chúng ta dùng 'gemini-1.5-flash' vì nó nhanh và rẻ (free), code tốt.
