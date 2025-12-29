@@ -30,7 +30,7 @@ Dự án được xây dựng để luyện tập tư duy **System Design**, **P
 ## 🛠️ Công nghệ sử dụng (Tech Stack)
 
 *   **Core:** Python 3.11
-*   **LLM Engine:** Google Gemini (Model: `gemini-1.5-flash` / `gemini-flash-latest`)
+*   **LLM Engine:** Google Gemini (Model: `gemini-flash-latest`)
 *   **Backend:** SQLAlchemy, Pandas
 *   **Frontend:** Streamlit, Plotly
 *   **Database:** SQLite (Dễ dàng mở rộng sang PostgreSQL)
