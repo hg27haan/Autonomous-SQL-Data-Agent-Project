@@ -1,58 +1,56 @@
 # 🏗️ Autonomous SQL Data Agent
 
-> **AI Assistant for Engineering Data Analysis**  
-> *Biến câu hỏi tự nhiên thành truy vấn SQL và biểu đồ trực quan.*
+> **Enterprise AI Assistant for Engineering Data Analysis**  
+> *Hệ thống AI phân tích dữ liệu kỹ thuật tự động, hỗ trợ SQL Server và CSV Upload.*
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
 ![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini-orange)
-![SQLAlchemy](https://img.shields.io/badge/ORM-SQLAlchemy-green)
+![SQL Server](https://img.shields.io/badge/DB-SQL%20Server-lightgrey)
+![ODBC](https://img.shields.io/badge/Driver-ODBC%2017%2F18-green)
 
 ## 📖 Giới thiệu (Introduction)
 
-Dự án này là một **AI Agent** có khả năng tự động hóa quy trình phân tích dữ liệu cho ngành kỹ thuật. Thay vì phải viết các câu lệnh SQL phức tạp, người dùng (kỹ sư, quản lý) chỉ cần đặt câu hỏi bằng tiếng Việt/Anh. Hệ thống sẽ tự động:
+Dự án này là một **AI Agent** chuyên dụng cho việc phân tích dữ liệu. Khác với các chatbot thông thường, hệ thống này kết nối trực tiếp vào Database doanh nghiệp (**Microsoft SQL Server**) hoặc dữ liệu cá nhân (**CSV**), biến ngôn ngữ tự nhiên thành hành động truy vấn dữ liệu thực tế.
 
-1.  Hiểu cấu trúc Database (Schema).
-2.  Viết câu lệnh SQL tương ứng.
-3.  Thực thi truy vấn an toàn.
-4.  Trực quan hóa kết quả bằng bảng và biểu đồ tương tác.
+Hệ thống được thiết kế theo tư duy **Stateless & Secure**, đảm bảo kết nối database chỉ được mở khi cần thiết và đóng ngay lập tức sau khi truy vấn xong.
 
-Dự án được xây dựng để luyện tập tư duy **System Design**, **Prompt Engineering** và **Full-stack AI Application**.
+## ✨ Tính năng nổi bật (Key Features)
 
-## ✨ Tính năng chính (Key Features)
-
-*   **💬 Natural Language to SQL:** Chuyển đổi câu hỏi tự nhiên ("Máy nào hay hỏng nhất?") thành SQL chuẩn xác.
-*   **🛡️ Secure Execution:** Cơ chế bảo vệ, chỉ cho phép truy vấn (`SELECT`), chặn các lệnh phá hoại (`DROP`, `DELETE`).
-*   **📊 Auto-Visualization:** Tự động phát hiện dữ liệu để vẽ biểu đồ phù hợp (Bar chart, Line chart) sử dụng Plotly.
-*   **🧠 Dynamic Schema Awareness:** AI tự động đọc cấu trúc bảng, không cần train lại model khi Database thay đổi.
-*   **💻 Modern UI:** Giao diện Chatbot thân thiện xây dựng bằng Streamlit.
+*   **🔌 Multi-Source Data:** 
+    *   Kết nối trực tiếp **Microsoft SQL Server** (Production).
+    *   Hỗ trợ **Upload CSV** (In-memory Database) cho dữ liệu Ad-hoc.
+*   **💬 Text-to-SQL (T-SQL):** AI tự động viết SQL chuẩn cú pháp Microsoft SQL Server (`TOP`, `GETDATE`,...).
+*   **🛡️ Security & Stateless:** 
+    *   Cơ chế **Auto-Dispose**: Tự động ngắt kết nối Database ngay sau khi lấy dữ liệu để tiết kiệm tài nguyên và bảo mật.
+    *   Chặn tuyệt đối các lệnh ghi/xóa (`DROP`, `DELETE`, `UPDATE`).
+*   **📊 Smart Visualization:** Tự động phát hiện loại dữ liệu để vẽ biểu đồ (Bar, Line) bằng Plotly.
+*   **📥 Export Data:** Cho phép tải xuống kết quả truy vấn dưới dạng file CSV.
+*   **🧠 Dynamic Schema:** AI tự động đọc cấu trúc bảng mới nhất mà không cần huấn luyện lại.
 
 ## 🛠️ Công nghệ sử dụng (Tech Stack)
 
 *   **Core:** Python 3.11
 *   **LLM Engine:** Google Gemini (Model: `gemini-flash-latest`)
-*   **Backend:** SQLAlchemy, Pandas
-*   **Frontend:** Streamlit, Plotly
-*   **Database:** SQLite (Dễ dàng mở rộng sang PostgreSQL)
+*   **Database Driver:** `pyodbc` (Kết nối SQL Server qua ODBC Driver).
+*   **Backend:** SQLAlchemy, Pandas.
+*   **Frontend:** Streamlit, Plotly.
 
 ## 📂 Cấu trúc dự án (Project Structure)
-
-Dự án được tổ chức theo mô hình Module hóa (Clean Architecture):
 
 ```text
 AUTONOMOUS-SQL-DATA-AGENT/
 │
-├── core/                   # Xử lý Logic chính (Backend)
-│   ├── database.py         # Quản lý kết nối & Schema
-│   ├── sql.generator.py        # Module kết nối AI để sinh SQL
-│   └── sql.executor.py         # Module thực thi SQL & Bảo mật
+├── core/                   # Modules xử lý chính (Backend)
+│   ├── database.py         # Quản lý kết nối (SQL Server + SQLite Memory)
+│   ├── sql_generator.py    # AI: Đọc Schema & Sinh SQL (Stateless)
+│   └── sql_executor.py     # Engine: Thực thi SQL & Bảo mật
 │
-├── scripts/                # Các công cụ hỗ trợ (Utilities)
-│   ├── seed_data.py        # Tạo dữ liệu giả lập (Machines, Logs...)
+├── scripts/                # Công cụ hỗ trợ (Utilities)
+│   ├── seed_data.py        # Tạo dữ liệu giả vào SQL Server
 │   └── check_models.py     # Kiểm tra model Google khả dụng
 │
-├── app.py                  # Giao diện Web (Streamlit Entry point)
-├── main.py                 # Giao diện Console (CLI Entry point)
-├── factory.db              # SQLite Database
-├── .env                    # Chứa API Key bảo mật
+├── app.py                  # Giao diện Web (Streamlit)
+├── main.py                 # Giao diện dòng lệnh (CLI)
+├── .env                    # Cấu hình bảo mật (API Key, DB Creds)
 └── requirements.txt        # Danh sách thư viện

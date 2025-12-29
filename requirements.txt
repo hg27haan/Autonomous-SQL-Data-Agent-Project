@@ -1,0 +1,19 @@
+# --- Core AI & LLM ---
+google-generativeai>=0.8.0
+
+# --- Web Framework ---
+streamlit>=1.30.0
+
+# --- Database & Drivers ---
+sqlalchemy>=2.0.0
+pyodbc>=5.0.0
+
+# --- Data Processing ---
+pandas>=2.0.0
+
+# --- Visualization ---
+plotly>=5.18.0
+
+# --- Utilities ---
+python-dotenv>=1.0.0
+faker>=20.0.0
