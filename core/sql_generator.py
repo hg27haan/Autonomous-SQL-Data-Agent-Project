@@ -13,6 +13,7 @@ if not api_key:
 
 genai.configure(api_key=api_key)
 
+
 def get_schema_string(engine):
     """
     Hàm tự động quét Database để lấy tên bảng và tên cột.
@@ -30,13 +31,15 @@ def get_schema_string(engine):
         
     return "\n".join(schema_lines)
 
-def generate_sql(question: str):
+def generate_sql(question: str, engine=None):
     """
     Input: Câu hỏi tiếng Việt
     Output: Câu lệnh SQL sạch
     """
     # Bước A: Lấy Schema thực tế
-    engine = init_db()
+    if engine is None:
+        engine = init_db()
+        
     schema_text = get_schema_string(engine)
     
     # Bước B: Tạo cấu hình cho Model
@@ -49,17 +52,21 @@ def generate_sql(question: str):
 
     # Bước C: Thiết lập Prompt (Chỉ dẫn hệ thống)
     system_instruction = f"""
-    Bạn là một chuyên gia SQL Engineer (SQLite Dialect).
+    Bạn là một chuyên gia SQL Server (T-SQL).
     Nhiệm vụ: Chuyển câu hỏi tự nhiên thành câu lệnh SQL để truy vấn dữ liệu.
 
     Database Schema hiện tại:
     {schema_text}
 
     Quy tắc TUYỆT ĐỐI:
-    1. Chỉ trả về duy nhất mã SQL. KHÔNG giải thích, KHÔNG chào hỏi.
-    2. KHÔNG được dùng Markdown block (tức là không được có ```sql ở đầu).
-    3. Luôn sử dụng Alias cho bảng (ví dụ: `machines m`, `maintenance_logs l`) để ngắn gọn.
-    4. Chỉ tạo câu lệnh `SELECT`. Cấm các lệnh `DROP`, `DELETE`, `UPDATE`.
+    1. Chỉ trả về duy nhất mã SQL. KHÔNG giải thích.
+    2. Sử dụng cú pháp **MS SQL Server (T-SQL)** chuẩn.
+        - Dùng `TOP n` thay vì `LIMIT n`. (Ví dụ: `SELECT TOP 5 * FROM...`)
+        - Dùng `GETDATE()` thay vì `now()`.
+        - Dùng `FORMAT(date_col, 'yyyy-MM-dd')` nếu cần format ngày.
+    3. Luôn sử dụng Alias cho bảng.
+    4. Chỉ tạo câu lệnh `SELECT`.
+    5. Không dùng Markdown (```sql).
     """
 
     model = genai.GenerativeModel(

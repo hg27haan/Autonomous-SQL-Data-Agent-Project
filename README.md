@@ -44,8 +44,8 @@ AUTONOMOUS-SQL-DATA-AGENT/
 │
 ├── core/                   # Xử lý Logic chính (Backend)
 │   ├── database.py         # Quản lý kết nối & Schema
-│   ├── generator.py        # Module kết nối AI để sinh SQL
-│   └── executor.py         # Module thực thi SQL & Bảo mật
+│   ├── sql.generator.py        # Module kết nối AI để sinh SQL
+│   └── sql.executor.py         # Module thực thi SQL & Bảo mật
 │
 ├── scripts/                # Các công cụ hỗ trợ (Utilities)
 │   ├── seed_data.py        # Tạo dữ liệu giả lập (Machines, Logs...)
