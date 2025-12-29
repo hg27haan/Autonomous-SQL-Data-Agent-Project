@@ -2,7 +2,7 @@
 import random
 from faker import Faker
 from sqlalchemy.orm import sessionmaker
-from models import init_db, Machine, Technician, MaintenanceLog
+from core.database import init_db, Machine, Technician, MaintenanceLog
 from datetime import date, timedelta
 
 # Cấu hình

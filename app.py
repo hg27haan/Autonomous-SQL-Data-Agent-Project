@@ -4,9 +4,9 @@ import plotly.express as px
 import time
 
 # Import các module bạn đã viết ở các giai đoạn trước
-from sql_generator import generate_sql
-from sql_executor import execute_sql
-from models import init_db
+from core.sql_generator import generate_sql
+from core.sql_executor import execute_sql
+from core.database import init_db
 
 # --- CẤU HÌNH TRANG WEB ---
 st.set_page_config(

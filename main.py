@@ -1,6 +1,6 @@
 import pandas as pd
-from sql_generator import generate_sql
-from sql_executor import execute_sql
+from core.sql_generator import generate_sql
+from core.sql_executor import execute_sql
 
 def chat_with_data(user_question):
     print(f"User: {user_question}")

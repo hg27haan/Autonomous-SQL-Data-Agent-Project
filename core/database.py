@@ -44,6 +44,10 @@ class MaintenanceLog(Base):
 
 # Hàm khởi tạo DB
 def init_db(db_name='factory.db'):
-    engine = create_engine(f'sqlite:///{db_name}')
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    db_path = os.path.join(base_dir, db_name)
+    
+    engine = create_engine(f'sqlite:///{db_path}')
     Base.metadata.create_all(engine)
     return engine

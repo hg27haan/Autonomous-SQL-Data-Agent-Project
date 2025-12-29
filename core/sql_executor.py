@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from sqlalchemy import text
-from models import init_db
+from core.database import init_db
 
 def is_safe_sql(sql_query: str) -> bool:
     """

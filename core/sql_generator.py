@@ -2,7 +2,7 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 from sqlalchemy import inspect
-from models import init_db
+from core.database import init_db
 
 # 1. Load biến môi trường & Cấu hình Google AI
 load_dotenv()
