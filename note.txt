@@ -1,0 +1,3 @@
+# 3. Kích hoạt môi trường (Windows)
+# Nếu dùng Mac/Linux: source venv/bin/activate
+venv\Scripts\activate
