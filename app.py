@@ -56,15 +56,36 @@ for message in st.session_state.messages:
 # --- HÀM VẼ BIỂU ĐỒ (Giữ nguyên) ---
 def auto_visualize(df):
     if df.empty or len(df) < 2: return None
+    
+    # 1. Logic vẽ biểu đồ Dự báo (Nếu có cột 'Type')
+    if 'Type' in df.columns and 'Forecast' in df['Type'].values:
+        # Tìm cột ngày và số
+        date_cols = df.select_dtypes(include=['datetime']).columns
+        num_cols = df.select_dtypes(include=['float', 'int']).columns
+        val_col = [c for c in num_cols if c != 'date_ordinal'][0] # Loại bỏ cột phụ nếu có
+        
+        chart = px.line(
+            df, 
+            x=date_cols[0], 
+            y=val_col, 
+            color='Type', # Chia màu theo Lịch sử/Dự báo
+            title=f"Forecast Analysis: {val_col}",
+            markers=True,
+            line_dash='Type' # Nét đứt cho dự báo
+        )
+        return chart
+
+    # 2. Logic vẽ biểu đồ thường (Cũ)
     num_cols = df.select_dtypes(include=['float', 'int']).columns.tolist()
     cat_cols = df.select_dtypes(include=['object', 'string']).columns.tolist()
     date_cols = df.select_dtypes(include=['datetime']).columns.tolist()
-    chart = None
+    
     if len(cat_cols) >= 1 and len(num_cols) >= 1:
-        chart = px.bar(df, x=cat_cols[0], y=num_cols[0], title=f"{num_cols[0]} by {cat_cols[0]}", template="plotly_white", color=num_cols[0])
+        return px.bar(df, x=cat_cols[0], y=num_cols[0], title=f"{num_cols[0]} by {cat_cols[0]}")
     elif len(date_cols) >= 1 and len(num_cols) >= 1:
-        chart = px.line(df, x=date_cols[0], y=num_cols[0], title="Trend over Time")
-    return chart
+        return px.line(df, x=date_cols[0], y=num_cols[0], title="Trend over Time")
+        
+    return None
 
 # --- LOGIC CHAT ---
 if prompt := st.chat_input("Hỏi gì đó về dữ liệu..."):
