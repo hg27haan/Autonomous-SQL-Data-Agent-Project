@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, text
 # Import core modules
 from core.sql_generator import generate_sql
 from core.sql_executor import execute_sql
+from core.smart_agent import process_question_with_retry
 from core.database import init_db
 
 # --- CẤU HÌNH TRANG WEB ---
@@ -74,47 +75,50 @@ if prompt := st.chat_input("Hỏi gì đó về dữ liệu..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # Gọi hàm generate_sql với engine hiện tại (Mặc định hoặc CSV Upload)
-        sql_query = generate_sql(prompt, engine=current_engine)
-        
-        if not sql_query:
-            st.error("Không thể tạo SQL.")
-            st.stop()
+        # GỌI SMART AGENT
+        with st.status("🤖 AI đang xử lý...", expanded=True) as status:
+            st.write("Đang phân tích và truy vấn...")
             
-        st.code(sql_query, language="sql")
-        
-        # Thực thi SQL với engine hiện tại
-        result = execute_sql(sql_query, engine=current_engine)
+            # Gọi hàm xử lý có vòng lặp
+            result = process_question_with_retry(prompt, engine=current_engine, max_retries=3)
+            
+            if isinstance(result, pd.DataFrame):
+                status.update(label="Thành công!", state="complete", expanded=False)
+            else:
+                status.update(label="Gặp sự cố", state="error", expanded=True)
 
+        # HIỂN THỊ KẾT QUẢ
         response_text = ""
         chart_obj = None
         
         if isinstance(result, str):
-            response_text = f"⚠️ Lỗi: {result}"
-            st.markdown(response_text)
+            # Trường hợp lỗi cuối cùng
+            response_text = f"⚠️ {result}"
+            st.error(response_text)
+        
         elif isinstance(result, pd.DataFrame):
             if result.empty:
-                response_text = "Không tìm thấy dữ liệu."
-                st.markdown(response_text)
+                response_text = "Truy vấn thành công nhưng không có dữ liệu."
+                st.info(response_text)
             else:
+                # Hiển thị SQL cuối cùng (nếu muốn debug)
+                if 'final_sql' in result.attrs:
+                    with st.expander("Xem câu lệnh SQL đã chạy"):
+                        st.code(result.attrs['final_sql'], language="sql")
+
                 st.dataframe(result, use_container_width=True)
                 
-                # --- TÍNH NĂNG MỚI: DOWNLOAD KẾT QUẢ ---
+                # Nút download
                 csv_data = result.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 Tải kết quả (CSV)",
-                    data=csv_data,
-                    file_name="query_result.csv",
-                    mime="text/csv",
-                )
+                st.download_button("📥 Tải kết quả (CSV)", csv_data, "data.csv", "text/csv")
                 
                 chart_obj = auto_visualize(result)
                 if chart_obj:
                     st.plotly_chart(chart_obj, use_container_width=True)
                 
                 response_text = f"Tìm thấy **{len(result)}** dòng dữ liệu."
-                st.markdown(response_text)
 
+        # Lưu lịch sử chat
         msg_data = {"role": "assistant", "content": response_text}
         if isinstance(result, pd.DataFrame) and not result.empty:
             msg_data["data"] = result

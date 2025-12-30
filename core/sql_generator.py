@@ -99,6 +99,44 @@ def generate_sql(question: str, engine=None):
     except Exception as e:
         print(f"❌ Lỗi khi gọi Google AI: {e}")
         return ""
+    
+def fix_sql_query(original_question: str, broken_sql: str, error_message: str, engine=None):
+    """
+    Hàm này dùng để yêu cầu AI sửa lại câu lệnh SQL bị lỗi.
+    """
+    if engine is None:
+        engine = init_db()
+        # Lưu ý: ở hàm fix này ta tạm thời không dispose engine ở đây 
+        # vì schema thường đã được cache hoặc lấy lại nhanh.
+        # Nhưng để đúng chuẩn stateless, bạn có thể áp dụng logic dispose như hàm generate_sql.
+
+    schema_text = get_schema_string(engine)
+
+    system_instruction = f"""
+    Bạn là chuyên gia SQL Server. Hãy sửa câu lệnh SQL bị lỗi sau đây.
+    
+    Database Schema:
+    {schema_text}
+    
+    Thông tin lỗi:
+    - User Question: "{original_question}"
+    - Broken SQL: {broken_sql}
+    - Error Message: {error_message}
+    
+    Yêu cầu:
+    1. Chỉ trả về mã SQL đã sửa (T-SQL).
+    2. Không giải thích.
+    3. Không dùng Markdown.
+    """
+    
+    model = genai.GenerativeModel(model_name="gemini-flash-latest", system_instruction=system_instruction)
+    
+    try:
+        response = model.generate_content("Hãy sửa lỗi này giúp tôi.")
+        sql = response.text.replace("```sql", "").replace("```", "").strip()
+        return sql
+    except Exception as e:
+        return ""
 
 # --- Phần test chạy thử ---
 if __name__ == "__main__":
